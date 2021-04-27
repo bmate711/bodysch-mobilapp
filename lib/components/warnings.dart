@@ -25,9 +25,8 @@ class _WarningsState extends State<Warnings> {
           HttpHeaders.contentTypeHeader: 'application/json',
         }
       );
-      if (response.statusCode == 204) {
-        Map<String, dynamic> data = jsonDecode(response.body);
-        return Warning.fromJson(data);
+      if (response.statusCode == 200) {
+        return Warning.fromJson(jsonDecode(response.body));
       }
       else {
         throw Exception('Faild to load data!');
@@ -51,22 +50,6 @@ class _WarningsState extends State<Warnings> {
               tiles: args.warnings.map<Widget>((warning) => ListTile(
                 title: Text(warning.text),
                 subtitle: Text(DateFormat('yyyy-MM-dd kk:mm').format(warning.date)),
-                // trailing: Wrap(
-                //   spacing: 24,
-                //   children: <Widget>[
-                //     Wrap (spacing: 0, children: <Widget>[
-                //       Text(
-                //         '3',
-                //         style: TextStyle(
-                //           color: Colors.red,
-                //           fontSize: 24,
-                //         ),
-                //       ),
-                //       Icon(Icons.warning_amber_rounded, size: 26, color: Colors.red,)
-                //     ]), // icon-1
-                //     Icon(Icons.message, size: 24,), // icon-2
-                //   ],
-                // ),
               )).toList(),
               context: context,
             ).toList(),
@@ -79,7 +62,7 @@ class _WarningsState extends State<Warnings> {
       final controller = TextEditingController();
       return FloatingActionButton(
         child:Icon(Icons.add),
-        onPressed: () => {
+        onPressed: () async {
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
@@ -109,42 +92,15 @@ class _WarningsState extends State<Warnings> {
           TextButton(
               child: const Text('Save'),
               onPressed: () async {
-                final warning = await addWarning(controller.text, "1226161032");
                 final WarningsArguments args = ModalRoute.of(context).settings.arguments;
+                final warning = await addWarning(controller.text, args.id);
                 args.warnings.add(warning);
                 Navigator.pop(context);
               })
         ],
-      ),),
-        },
+      ),
+          ).then((value) => setState(() {}));
+    },
       ) ;
-  }
-
-  _textInputWithTitle(String initValue, String title, onChanged, String hintText) {
-    return(
-      Padding(
-        padding: EdgeInsets.fromLTRB(24, 4, 24, 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              initialValue: initValue,
-            decoration: InputDecoration(
-              hintText: hintText,
-              labelText: title,
-            ),
-            validator: (value) {
-              if (value.isEmpty) {
-                return 'Please fill';
-              }
-              return null;
-            },
-            onChanged: (value) {
-              onChanged(value);
-            },)
-          ],
-        ),
-      )
-    );
   }
 }
